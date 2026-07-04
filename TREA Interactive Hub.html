@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TREA Interactive Hub</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruuy+Pro:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', 'Kantumruuy Pro', sans-serif;
+            background-color: #f8fafc;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #fbcfe8;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #f472b6;
+        }
+        #wheelCanvas {
+            transition: transform 4s cubic-bezier(0.1, 0.8, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="text-slate-700 min-h-screen flex flex-col">
+
+    <!-- Navbar Header -->
+    <header class="bg-white border-b border-slate-100 px-6 py-3 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="bg-pink-600 text-white font-bold text-2xl w-10 h-10 flex items-center justify-center rounded-xl shadow-md">
+                ...?
+            </div>
+            <div>
+                <h1 class="font-bold text-lg text-pink-600 leading-tight">TREA</h1>
+                <p class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Interactive Hub</p>
+            </div>
+        </div>
+        
+        <nav class="flex bg-slate-50 p-1 rounded-xl border border-slate-100">
+            <button onclick="switchTab('picker')" id="btn-picker" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-white text-pink-600 shadow-sm border border-slate-100/50">
+                <i class="fa-solid fa-circle-notch"></i> Picker Wheel
+            </button>
+            <button onclick="switchTab('fishing')" id="btn-fishing" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-800">
+                <i class="fa-solid fa-fish"></i> Fishing Game
+            </button>
+            <button onclick="switchTab('math')" id="btn-math" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-800">
+                <i class="fa-solid fa-brain"></i> Sart AI
+            </button>
+        </nav>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
+        
+        <!-- TAB 1: PICKER WHEEL -->
+        <div id="tab-picker" class="tab-content grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in">
+            <!-- Settings Card -->
+            <div class="lg:col-span-4 bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col h-[580px]">
+                <div class="flex items-center gap-2 mb-1">
+                    <i class="fa-solid fa-gear text-pink-500 text-lg"></i>
+                    <h2 class="font-bold text-slate-800">Wheel Settings</h2>
+                </div>
+                <p class="text-xs text-slate-400 mb-4">Manage names displayed on the picker wheel.</p>
+
+                <form id="addNameForm" class="flex gap-2 mb-4">
+                    <input type="text" id="nameInput" placeholder="Enter a name..." required class="flex-1 px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-pink-400">
+                    <button type="submit" class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-1"><i class="fa-solid fa-plus text-xs"></i> Add</button>
+                </form>
+
+                <div class="flex justify-between items-center text-xs font-semibold mb-2">
+                    <span class="text-slate-500">Total: <span id="totalCount" class="text-pink-600">7</span> names</span>
+                    <button onclick="clearAllNames()" class="text-red-500 hover:text-red-600 flex items-center gap-1"><i class="fa-solid fa-trash-can"></i> Clear All</button>
+                </div>
+
+                <div id="namesList" class="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-2 mb-4"></div>
+
+                <div class="border-t border-slate-100 pt-4">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Preset Ideas</span>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="loadPreset('fruits')" class="px-2.5 py-1.5 bg-slate-50 hover:bg-pink-50 hover:text-pink-600 rounded-lg text-xs font-medium border border-slate-100">🍎 Fruits</button>
+                        <button onclick="loadPreset('friends')" class="px-2.5 py-1.5 bg-slate-50 hover:bg-pink-50 hover:text-pink-600 rounded-lg text-xs font-medium border border-slate-100">👤 Friends</button>
+                        <button onclick="loadPreset('dinner')" class="px-2.5 py-1.5 bg-slate-50 hover:bg-pink-50 hover:text-pink-600 rounded-lg text-xs font-medium border border-slate-100">🍔 Dinner</button>
+                        <button onclick="loadPreset('dice')" class="px-2.5 py-1.5 bg-slate-50 hover:bg-pink-50 hover:text-pink-600 rounded-lg text-xs font-medium border border-slate-100">🎲 Dice</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wheel Visualization -->
+            <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center justify-center relative p-6 h-[580px]">
+                <div class="relative w-[400px] h-[400px] flex items-center justify-center">
+                    <div class="absolute -top-2 z-30 text-pink-600 drop-shadow"><i class="fa-solid fa-caret-down text-3xl"></i></div>
+                    <div class="w-full h-full rounded-full overflow-hidden shadow-xl border-4 border-slate-50 p-0.5 bg-white">
+                        <canvas id="wheelCanvas" width="400" height="400" class="w-full h-full"></canvas>
+                    </div>
+                    <button id="spinBtn" onclick="spinWheel()" class="absolute z-20 w-16 h-16 bg-pink-600 hover:bg-pink-700 text-white font-bold rounded-full shadow-lg border-4 border-white tracking-wider text-sm active:scale-95 transition-all">SPIN</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: FISHING GAME -->
+        <div id="tab-fishing" class="tab-content hidden grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in">
+            <!-- Fish Pond Settings -->
+            <div class="lg:col-span-4 bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col h-[580px]">
+                <div class="flex items-center gap-2 mb-1">
+                    <i class="fa-solid fa-fish-fins text-pink-500 text-lg"></i>
+                    <h2 class="font-bold text-slate-800">Fish Pond</h2>
+                </div>
+                <p class="text-xs text-slate-400 mb-4">Manage items/names swimming in the lake.</p>
+
+                <form id="addFishForm" class="flex gap-2 mb-4">
+                    <input type="text" id="fishInput" placeholder="Add a fish name..." required class="flex-1 px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-pink-400">
+                    <button type="submit" class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-1"><i class="fa-solid fa-plus text-xs"></i> Add</button>
+                </form>
+
+                <div class="flex justify-between items-center text-xs font-semibold mb-2">
+                    <span class="text-slate-500">Fish Count: <span id="fishCount" class="text-pink-600">4</span></span>
+                    <button onclick="clearAllFish()" class="text-red-500 hover:text-red-600 flex items-center gap-1"><i class="fa-solid fa-trash-can"></i> Clear All</button>
+                </div>
+
+                <div id="fishList" class="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-2 mb-4"></div>
+            </div>
+
+            <!-- Fishing Canvas Box -->
+            <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col h-[580px]">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="font-bold text-slate-800 flex items-center gap-1"><i class="fa-solid fa-ship text-pink-600"></i> TREA Fishing Pier</h3>
+                        <p class="text-xs text-slate-400">Catch a random swimming name!</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="startFishing()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-play text-xs"></i> Start Fishing!</button>
+                        <button onclick="resetHook()" class="border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-1.5 text-slate-600"><i class="fa-solid fa-rotate-left text-xs"></i> Reset hook</button>
+                    </div>
+                </div>
+                <!-- Ocean Simulation Base -->
+                <div class="flex-1 bg-sky-400 rounded-xl relative overflow-hidden flex flex-col justify-between border border-sky-300">
+                    <!-- Sky and Pier area -->
+                    <div class="h-1/4 bg-sky-200 relative border-b border-sky-300/40">
+                        <div class="absolute bottom-0 left-8 w-12 h-16 bg-amber-800 rounded-t-sm flex flex-col justify-end items-center">
+                            <!-- Fisher icon placeholder -->
+                            <div class="text-2xl mb-1 text-slate-800"><i class="fa-solid fa-user-ninja"></i></div>
+                        </div>
+                    </div>
+                    <!-- Under Water -->
+                    <div class="h-3/4 bg-gradient-to-b from-sky-500 to-blue-700 relative flex items-center justify-center">
+                        <div id="fishingStatus" class="text-white text-lg font-bold bg-black/20 px-6 py-2 rounded-full backdrop-blur-sm">Click Start Fishing!</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: MATH AI -->
+        <div id="tab-math" class="tab-content hidden grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in">
+            <!-- Sidebar Specialist info -->
+            <div class="lg:col-span-4 bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col h-[580px] justify-between">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <i class="fa-solid fa-brain text-pink-500 text-lg"></i>
+                        <h2 class="font-bold text-slate-800">Math AI Specialist</h2>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4">Solving formulas, algebra, geometry, calculus, and handling exercises.</p>
+
+                    <div class="space-y-3">
+                        <div class="flex gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
+                            <p class="text-xs text-slate-600 font-medium">Supports step-by-step math breakdowns and detailed conceptual lessons.</p>
+                        </div>
+                        <div class="flex gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
+                            <p class="text-xs text-slate-600 font-medium">Simulate document/exercise upload (PDF, DOCX, PowerPoint) to analyze files instantly.</p>
+                        </div>
+                    </div>
+
+                    <!-- Mock Drag & Drop Area -->
+                    <div class="border-2 border-dashed border-slate-200 hover:border-pink-300 rounded-xl p-6 text-center mt-4 transition cursor-pointer bg-slate-50/50">
+                        <i class="fa-solid fa-cloud-arrow-up text-slate-400 text-2xl mb-2"></i>
+                        <h4 class="text-xs font-bold text-slate-700">Drop PDF, PowerPoint or Image</h4>
+                        <p class="text-[10px] text-slate-400 mt-1">Simulates sending files for AI parsing</p>
+                    </div>
+                </div>
+
+                <!-- Suggestions Panel -->
+                <div class="bg-pink-50/50 border border-pink-100/60 rounded-xl p-4 mt-4">
+                    <h5 class="text-xs font-bold text-pink-800 flex items-center gap-1.5 mb-2"><i class="fa-solid fa-circle-info"></i> Math Sandbox Suggestions</h5>
+                    <ul class="text-[11px] text-pink-700 font-medium space-y-1.5">
+                        <li class="cursor-pointer hover:underline" onclick="fillMathInput('Say \&quot;Hi!\&quot; to AI')">💬 Say "Hi!" to AI</li>
+                        <li class="cursor-pointer hover:underline" onclick="fillMathInput('Solve x^2 * sin(x) dx')">✏️ Solve x^2 * sin(x) dx</li>
+                        <li class="cursor-pointer hover:underline" onclick="fillMathInput('Roots of 3x^2 + 5x - 8 = 0')">✏️ Roots of 3x^2 + 5x - 8 = 0</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Chat Area -->
+            <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col h-[580px]">
+                <!-- Chat Header -->
+                <div class="p-4 border-b border-slate-100 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center text-lg"><i class="fa-solid fa-robot"></i></div>
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-800">TREA Smart Assistant</h3>
+                            <p class="text-[10px] text-emerald-500 font-semibold">Powered by Gemini 2.5</p>
+                        </div>
+                    </div>
+                    <button onclick="clearChat()" class="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1"><i class="fa-solid fa-trash-can"></i> Clear Chat</button>
+                </div>
+                <!-- Chat Feed -->
+                <div id="chatFeed" class="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-4 bg-slate-50/50">
+                    <!-- Welcome Message -->
+                    <div class="flex gap-3 max-w-[85%]">
+                        <div class="w-7 h-7 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center text-xs flex-shrink-0"><i class="fa-solid fa-robot"></i></div>
+                        <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+                            <h4 class="font-bold text-xs text-slate-800 mb-1">Yo! Welcome to TREA Math AI! 🎓</h4>
+                            <p class="text-xs text-slate-600 leading-relaxed">I am your extremely talkative and helpful math buddy. Shoot me any greetings or math tasks, and I'll break it down for u step-by-step!</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Chat Input bar -->
+                <div class="p-4 border-t border-slate-100 bg-white rounded-b-2xl">
+                    <form id="chatForm" class="flex gap-2">
+                        <input type="text" id="chatInput" placeholder="Say hi or drop a math question..." required class="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-pink-400">
+                        <button type="submit" class="bg-pink-600 hover:bg-pink-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition shadow-sm"><span class="hidden sm:inline">Send</span> <i class="fa-solid fa-paper-plane text-xs"></i></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Winner Modal PopUp -->
+    <div id="winnerModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-xl border border-slate-100">
+            <div class="w-14 h-14 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center mx-auto text-xl mb-3"><i class="fa-solid fa-trophy"></i></div>
+            <h3 class="text-lg font-bold text-slate-800">🎉 Winner Found!</h3>
+            <p id="winnerName" class="text-2xl font-extrabold text-pink-600 my-4 break-words"></p>
+            <button onclick="closeWinnerModal()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2 rounded-xl transition text-sm">Awesome</button>
+        </div>
+    </div>
+
+    <!-- LOGIC SCRIPT -->
+    <script>
+        // Data States
+        let names = ['Sophia', 'Alexander', 'Olivia', 'Emma', 'Liam', 'Noah', 'Ava'];
+        let fishList = ['Golden Trout', 'Nemo', 'Whale Shark', 'Marlin'];
+        const pinkColors = ['#db2777', '#ec4899', '#f472b6', '#fbcfe8', '#be185d', '#fda4af'];
+        let currentRotation = 0;
+        let isSpinning = false;
+
+        // Elements
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Tab Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-white', 'text-pink-600', 'shadow-sm', 'font-semibold', 'border');
+                el.classList.add('text-slate-500', 'font-medium');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            activeBtn.classList.add('bg-white', 'text-pink-600', 'shadow-sm', 'font-semibold', 'border', 'border-slate-100/50');
+            activeBtn.classList.remove('text-slate-500', 'font-medium');
+
+            if (tabId === 'picker') drawWheel();
+        }
+
+        // --- PICKER WHEEL LOGIC ---
+        function renderNames() {
+            const container = document.getElementById('namesList');
+            container.innerHTML = '';
+            document.getElementById('totalCount').textContent = names.length;
+            names.forEach((name, i) => {
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-sm">
+                        <span class="font-medium text-slate-700">${name}</span>
+                        <button onclick="removeName(${i})" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+                    </div>`;
+            });
+        }
+
+        document.getElementById('addNameForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const input = document.getElementById('nameInput');
+            if (input.value.trim()) {
+                names.push(input.value.trim());
+                input.value = '';
+                renderNames();
+                drawWheel();
+            }
+        });
+
+        function removeName(index) {
+            names.splice(index, 1);
+            renderNames();
+            drawWheel();
+        }
+
+        function clearAllNames() { names = []; renderNames(); drawWheel(); }
+
+        function loadPreset(type) {
+            const presets = {
+                fruits: ['Apple', 'Banana', 'Cherry', 'Mango', 'Orange'],
+                friends: ['Michael', 'Jessica', 'David', 'Sarah', 'Alex'],
+                dinner: ['Pizza', 'Burger', 'Sushi', 'Noodles'],
+                dice: ['1', '2', '3', '4', '5', '6']
+            };
+            names = presets[type] || [];
+            renderNames();
+            drawWheel();
+        }
+
+        function drawWheel() {
+            const size = canvas.width;
+            const center = size / 2;
+            const radius = center - 10;
+            ctx.clearRect(0, 0, size, size);
+            if (names.length === 0) return;
+
+            const arc = (2 * Math.PI) / names.length;
+            names.forEach((name, i) => {
+                const angle = i * arc;
+                ctx.beginPath();
+                ctx.arc(center, center, radius, angle, angle + arc);
+                ctx.lineTo(center, center);
+                ctx.fillStyle = pinkColors[i % pinkColors.length];
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(center, center);
+                ctx.rotate(angle + arc / 2);
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.fillText(name, radius - 20, 5);
+                ctx.restore();
+            });
+        }
+
+        function spinWheel() {
+            if (isSpinning || names.length === 0) return;
+            isSpinning = true;
+            const extraDeg = Math.floor(Math.random() * 360);
+            currentRotation += (360 * 5) + extraDeg;
+            canvas.style.transform = `rotate(${currentRotation}deg)`;
+
+            setTimeout(() => {
+                isSpinning = false;
+                const actualDegrees = currentRotation % 360;
+                const arcSizeDeg = 360 / names.length;
+                let winnerIndex = Math.floor((360 - actualDegrees + 270) % 360 / arcSizeDeg);
+                if (winnerIndex >= names.length) winnerIndex = 0;
+                
+                document.getElementById('winnerName').textContent = names[winnerIndex];
+                document.getElementById('winnerModal').classList.remove('hidden');
+            }, 4000);
+        }
+
+        function closeWinnerModal() { document.getElementById('winnerModal').classList.add('hidden'); }
+
+        // --- FISHING LOGIC ---
+        function renderFish() {
+            const container = document.getElementById('fishList');
+            container.innerHTML = '';
+            document.getElementById('fishCount').textContent = fishList.length;
+            fishList.forEach((fish, i) => {
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-sm">
+                        <span class="font-medium text-slate-700">${fish}</span>
+                        <button onclick="removeFish(${i})" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+                    </div>`;
+            });
+        }
+
+        document.getElementById('addFishForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const input = document.getElementById('fishInput');
+            if (input.value.trim()) {
+                fishList.push(input.value.trim());
+                input.value = '';
+                renderFish();
+            }
+        });
+
+        function removeFish(index) { fishList.splice(index, 1); renderFish(); }
+        function clearAllFish() { fishList = []; renderFish(); }
+
+        function startFishing() {
+            if (fishList.length === 0) return;
+            const status = document.getElementById('fishingStatus');
+            status.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Casting line...`;
+            setTimeout(() => {
+                status.innerHTML = `<i class="fa-solid fa-hook text-amber-300"></i> Waiting for a bite...`;
+                setTimeout(() => {
+                    const randomFish = fishList[Math.floor(Math.random() * fishList.length)];
+                    status.innerHTML = `🐟 Reeled in: <strong class="text-yellow-200">${randomFish}</strong>!`;
+                }, 1500);
+            }, 1000);
+        }
+        function resetHook() { document.getElementById('fishingStatus').textContent = 'Click Start Fishing!'; }
+
+        // --- MATH AI LOGIC ---
+        function fillMathInput(text) { document.getElementById('chatInput').value = text; }
+        function clearChat() {
+            document.getElementById('chatFeed').innerHTML = `
+                <div class="flex gap-3 max-w-[85%]">
+                    <div class="w-7 h-7 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center text-xs flex-shrink-0"><i class="fa-solid fa-robot"></i></div>
+                    <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+                        <p class="text-xs text-slate-600">Chat cleared. Ask me any math question!</p>
+                    </div>
+                </div>`;
+        }
+
+        document.getElementById('chatForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const input = document.getElementById('chatInput');
+            const feed = document.getElementById('chatFeed');
+            if (!input.value.trim()) return;
+
+            const userText = input.value.trim();
+            feed.innerHTML += `
+                <div class="flex gap-3 max-w-[85%] ml-auto justify-end">
+                    <div class="bg-pink-600 text-white rounded-2xl p-3 shadow-sm text-xs">${userText}</div>
+                </div>`;
+            
+            input.value = '';
+            feed.scrollTop = feed.scrollHeight;
+
+            treaTimeout(() => {
+                feed.innerHTML += `
+                    <div class="flex gap-3 max-w-[85%]">
+                        <div class="w-7 h-7 rounded-lg bg-pink-100 text-pink-600 flex items-center justify-center text-xs flex-shrink-0"><i class="fa-solid fa-robot"></i></div>
+                        <div class="bg-white border border-slate-100 rounded-2xl p-3 shadow-sm text-xs text-slate-600">
+                            <p class="font-semibold text-slate-800 mb-1">💡 TREA Math Breakdown:</p>
+                            I received your prompt regarding "${userText}". Here is a simulation of the problem-solving logic. Let me know if you want a deeper visual calculation!
+                        </div>
+                    </div>`;
+                feed.scrollTop = feed.scrollHeight;
+            }, 1000);
+        });
+
+        // App Init
+        renderNames();
+        renderFish();
+        drawWheel();
+    </script>
+</body>
+</html>
